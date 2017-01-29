@@ -233,7 +233,45 @@ class Multi_layer_perceptron(object):
 
         accuracy = float(correct / valid_data.shape[0])
         return accuracy, loss / data.shape[0]
+
+    def numerical_gradients(self, data, labels):
+        perturbation = 0.01
+        old_loss = 0.0
+        self.num_gradients = {}
+        for i in range(data.shape[0]):
+            inputs = data[i]
+            outputs = self.forward_pass(inputs)
+            probs = self.softmax()
+            old_loss = old_loss + self.compute_loss(labels[i])
+            # print("old loss = %f" % old_loss)
+            self.model_grads = self.compute_gradients(labels[i])
+
+        self.loss = 0.0
+        # for j in range(self.no_hidden + 1):
+        #     self.gradients["weights" + str(i)] = np.zeros_like(self.gradients["weights" + str(i)])
             
+        for j in range(self.no_hidden + 1):
+            wt_string = "weights" + str(j)
+            self.num_gradients[wt_string] = np.zeros_like(self.gradients[wt_string])
+            for l in range(self.gradients[wt_string].shape[0]):
+                for b in range(self.gradients[wt_string].shape[1]):
+                    old_weight = self.params[wt_string][l][b]
+                    self.params[wt_string][l][b] = old_weight + perturbation
+                    new_loss = 0.0
+                    for i in range(data.shape[0]):
+                        inputs = data[i]
+                        outputs = self.forward_pass(inputs)
+                        probs = self.softmax()
+                        new_loss = new_loss + self.compute_loss(labels[i])
+                    delta_loss = new_loss - old_loss
+                    # print("new loss = %f"% new_loss)
+                    self.num_gradients[wt_string][l][b] = delta_loss / perturbation
+                    print(self.num_gradients[wt_string][l][b] - self.model_grads[wt_string][l][b])
+                    self.params[wt_string][l][b] = old_weight
+                    self.loss = 0.0
+                    
+        return self.num_gradients
+                        
 
 def relu(inputs):
     #verified forward
@@ -286,6 +324,8 @@ validation_data = np.reshape(validation_data, (validation_data.shape[0], shape[1
 test_data = np.reshape(test_data, (test_data.shape[0], shape[1]*shape[2]))
 # print(train_data.shape, test_data.shape, validation_data.shape)
 
-for epoch in range(num_epochs):
-    acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
-    print(acc, loss)
+# for epoch in range(num_epochs):
+#     acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
+#     print(acc, loss)
+
+num_grads = model.numerical_gradients(train_data[:1], train_labels[:1])

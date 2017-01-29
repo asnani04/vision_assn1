@@ -191,10 +191,7 @@ class Multi_layer_perceptron(object):
             self.apply_gd_optimizer(0.1, data.shape[0])
             self.loss = 0.0
 
-        if optimizer == "sgd_minibatch":
-            '''
-            Use stochastic mini batch gradient descent.
-            '''
+        else:
             train_size = data.shape[0]
             no_batches = train_size // batch_size
             for i in range(no_batches):
@@ -207,26 +204,23 @@ class Multi_layer_perceptron(object):
                     loss = self.compute_loss(labels[mini_batch_indices[j]])
                     grads = self.compute_gradients(labels[mini_batch_indices[j]])
                     # print(self.gradients["weights0"][1][1])
-                self.apply_gd_optimizer(0.01, batch_size)
+                if optimizer == "sgd_minibatch":
+                    '''
+                    Use stochastic mini batch gradient descent.
+                    '''
+                    self.apply_gd_optimizer(0.01, batch_size)
 
-        if optimizer == "momentum_minibatch":
-            '''
-            Use mini batch gradient descent with momentum
-            '''
-            train_size = data.shape[0]
-            no_batches = train_size // batch_size
-            for i in range(no_batches):
-                mini_batch_indices = np.random.permutation(train_size)[:batch_size]
-                mini_batch = []
-                for j in range(batch_size):
-                    inputs = data[mini_batch_indices[j]]
-                    outputs = self.forward_pass(inputs)
-                    probs = self.softmax()
-                    loss = self.compute_loss(labels[mini_batch_indices[j]])
-                    grads = self.compute_gradients(labels[mini_batch_indices[j]])
-                    # print(self.gradients["weights0"][1][1])
-                self.apply_momentum_optimizer(0.001, 0.009, batch_size)
-                
+                if optimizer == "momentum_minibatch":
+                    '''
+                    Use mini batch gradient descent with momentum
+                    '''
+                    self.apply_momentum_optimizer(0.001, batch_size, 0.009)
+                if optimizer == "adam_minibatch":
+                    '''
+                    Use mini batch adam optimizer
+                    '''
+                    self.apply_adam_optimizer(0.01, batch_size)
+            
         self.loss = 0.0
         correct = 0
         
@@ -293,5 +287,5 @@ test_data = np.reshape(test_data, (test_data.shape[0], shape[1]*shape[2]))
 # print(train_data.shape, test_data.shape, validation_data.shape)
 
 for epoch in range(num_epochs):
-    acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "momentum_minibatch")
+    acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
     print(acc, loss)

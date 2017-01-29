@@ -108,19 +108,30 @@ class Multi_layer_perceptron(object):
         Computes gradients of the loss with respect to all the parameters
         '''
         self.node_grads["node" + str(self.no_hidden + 1)] = np.subtract(self.probs, true_label)
+        # print(self.node_grads["node" + str(self.no_hidden + 1)].shape)
         for i in range(self.no_hidden, 0, -1):
             node_grads = np.matmul(self.params["weights" + str(i)], self.node_grads["node" + str(i+1)])
+            # print(node_grads.shape)
             if self.act_fun == 0:
                 layer_grad = grad_tanh(self.activations["acts" + str(i)])
             elif self.act_fun == 1:
                 layer_grad = grad_relu(self.activations["acts" + str(i)])
-            node_grads = np.dot(node_grads, layer_grad)
+            node_grads = np.multiply(node_grads, layer_grad)
             self.node_grads["node" + str(i)] = node_grads
+            # print(self.node_grads["node" + str(i)].shape)
 
         for i in range(self.no_hidden + 1):
             weight_grads = np.outer(self.activations["acts" + str(i)], self.node_grads["node" + str(i+1)])
+      
+            # for l in range(self.gradients["weights" + str(i)].shape[0]):
+            #     for b in range(self.gradients["weights" + str(i)].shape[1]):
+            #         grad = self.gradients["weights" + str(i)][l][b]
+            #         if grad + weight_grads[l][b] < batch_size * 5:
+            #             self.gradients["weights" + str(i)][l][b] = grad + weight_grads[l][b]
             self.gradients["weights" + str(i)] = np.add(self.gradients["weights" + str(i)], weight_grads)
-            # self.sq_gradients["weights" + str(i)] = np.square(self.gradients["weights" + str(i)])
+            upper_cap = batch_size * 5 * np.ones_like(self.gradients["weights" + str(i)])
+            self.gradients["weights" + str(i)] = np.minimum(self.gradients["weights" + str(i)], upper_cap)
+            self.sq_gradients["weights" + str(i)] = np.square(self.gradients["weights" + str(i)])
             
         return self.gradients
 
@@ -138,8 +149,8 @@ class Multi_layer_perceptron(object):
         momentum: coefficient to use with previous momentum
         '''
         for i in range(self.no_hidden + 1):
-            self.prev_update["weights" + str(i)] = np.add((momentum * self.prev_update["weights" + str(i)]), (learning_rate) * self.gradients["weights" + str(i)])
-            self.params["weights" + str(i)] = np.subtract(self.params["weights" + str(i)], self.prev_update["weights" + str(i)] / div_factor)
+            self.prev_update["weights" + str(i)] = np.add((momentum * self.prev_update["weights" + str(i)]), (learning_rate / div_factor) * self.gradients["weights" + str(i)])
+            self.params["weights" + str(i)] = np.subtract(self.params["weights" + str(i)], self.prev_update["weights" + str(i)])
             self.gradients["weights" + str(i)] = np.zeros_like(self.gradients["weights" + str(i)])
 
     def apply_adam_optimizer(self, learning_rate, div_factor, beta1 = 0.9, beta2 = 0.999):
@@ -147,8 +158,8 @@ class Multi_layer_perceptron(object):
         Applies Adam optimizer to the params
         '''
         for i in range(self.no_hidden + 1):
-            self.avg_grad["weights" + str(i)] = np.add(beta1 * self.avg_grad["weights" + str(i)], (1 - beta1) * self.gradients["weights" + str(i)])
-            self.avg_squared_grad["weights" + str(i)] = np.add(beta2 * self.avg_squared_grad["weights" + str(i)], (1 - beta2) * self.sq_gradients["weights" + str(i)])
+            self.avg_grad["weights" + str(i)] = np.add(beta1 * self.avg_grad["weights" + str(i)], ((1 - beta1) / div_factor) * self.gradients["weights" + str(i)])
+            self.avg_squared_grad["weights" + str(i)] = np.add(beta2 * self.avg_squared_grad["weights" + str(i)], ((1 - beta2) / div_factor) * self.sq_gradients["weights" + str(i)])
             self.unbiased_avg_grad = self.avg_grad["weights" + str(i)] / (1 - beta1)
             self.unbiased_avg_sq_grad = self.avg_squared_grad["weights" + str(i)] / (1 - beta2)
             epsilon = 1e-8

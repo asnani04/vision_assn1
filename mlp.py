@@ -56,6 +56,9 @@ class Multi_layer_perceptron(object):
         act_string = "acts" + str(no_hidden+1)
         self.activations[act_string] = acts
         self.node_grads["node" + str(no_hidden+1)] = node_grads
+
+        self.running_beta1 = None
+        self.running_beta2 = None
         
     def nonlinear(self, inputs):
         '''
@@ -121,7 +124,11 @@ class Multi_layer_perceptron(object):
             # print(self.node_grads["node" + str(i)].shape)
 
         for i in range(self.no_hidden + 1):
-            weight_grads = np.outer(self.activations["acts" + str(i)], self.node_grads["node" + str(i+1)])
+            if self.act_fun == 0:
+                layer_grad = grad_tanh(self.activations["acts" + str(i+1)])
+            elif self.act_fun == 1:
+                layer_grad = grad_relu(self.activations["acts" + str(i+1)])
+            weight_grads = np.outer(self.activations["acts" + str(i)], np.multiply(layer_grad, self.node_grads["node" + str(i+1)]))
       
             # for l in range(self.gradients["weights" + str(i)].shape[0]):
             #     for b in range(self.gradients["weights" + str(i)].shape[1]):
@@ -157,11 +164,21 @@ class Multi_layer_perceptron(object):
         '''
         Applies Adam optimizer to the params
         '''
+        if self.running_beta2 is None:
+            self.running_beta2 = beta2
+        else:
+            self.running_beta2 = self.running_beta2 * beta2
+
+        if self.running_beta1 is None:
+            self.running_beta1 = beta1
+        else:
+            self.running_beta1 = self.running_beta1 * beta1
+            
         for i in range(self.no_hidden + 1):
             self.avg_grad["weights" + str(i)] = np.add(beta1 * self.avg_grad["weights" + str(i)], ((1 - beta1) / div_factor) * self.gradients["weights" + str(i)])
             self.avg_squared_grad["weights" + str(i)] = np.add(beta2 * self.avg_squared_grad["weights" + str(i)], ((1 - beta2) / div_factor) * self.sq_gradients["weights" + str(i)])
-            self.unbiased_avg_grad = self.avg_grad["weights" + str(i)] / (1 - beta1)
-            self.unbiased_avg_sq_grad = self.avg_squared_grad["weights" + str(i)] / (1 - beta2)
+            self.unbiased_avg_grad = self.avg_grad["weights" + str(i)] / (1 - self.running_beta1)
+            self.unbiased_avg_sq_grad = self.avg_squared_grad["weights" + str(i)] / (1 - self.running_beta2)
             epsilon = 1e-8
             for l in range(self.params["weights" + str(i)].shape[0]):
                 for b in range(self.params["weights" + str(i)].shape[1]):
@@ -324,8 +341,8 @@ validation_data = np.reshape(validation_data, (validation_data.shape[0], shape[1
 test_data = np.reshape(test_data, (test_data.shape[0], shape[1]*shape[2]))
 # print(train_data.shape, test_data.shape, validation_data.shape)
 
-# for epoch in range(num_epochs):
-#     acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
-#     print(acc, loss)
+for epoch in range(num_epochs):
+    acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
+    print(acc, loss)
 
-num_grads = model.numerical_gradients(train_data[:1], train_labels[:1])
+# num_grads = model.numerical_gradients(train_data[:1], train_labels[:1])

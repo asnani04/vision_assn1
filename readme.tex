@@ -1,0 +1,47 @@
+\documentclass[12pt, a4paper]{article}
+\title{\textbf{Assignment 1, CS698U: Multi layer perceptron}}
+\author{Nishit Asnani, 14433}
+\date{January, 2017}
+\usepackage[]{geometry}
+\usepackage[T1]{fontenc}
+\geometry{a4paper, left=15mm, top=20mm, right=15mm, bottom=20mm,}
+
+
+\begin{document}
+\maketitle
+
+\section{Objective}
+To implement and understand the backpropagation algorithm by building a hand written digit classifier for the MNIST dataset with standard split.
+
+\section{Setup}
+The code has been broken up into three files:
+
+\begin{itemize}
+\item \textit{input.py}: This file is used for loading the MNIST dataset from Yann Lecun's website and storing it in a manner usable by our MLP. For this purpose, input code from \textbf{TensorFlow} tutorial's \textit{convolutional.py} \cite{mnist_load} has been used as it is, so that obtaining the dataset in a convenient format becomes easy. 
+
+\item \textit{mlp.py}: This file defines the class \texttt{Multi\_layer\_perceptron}, which forms the crux of the assignment. An object of this class is an MLP model, with a given number of hidden layers, number of neurons in each hidden layer, and activation function as arguments to the constructor. The various class members have been described later on in the report.
+
+\item \textit{calling.py}: This forms a python script that loads the dataset by calling the relevant functions in \textit{input.py}, builds models using \textit{mlp.py} and trains them, recording the accuracy and loss statistics after each epoch. 
+
+\end{itemize}
+
+\section{Class \texttt{Multi\_layer\_perceptron}}
+\begin{itemize}
+\item The constructor takes number of hidden layers, number of nodes (neurons) in each hidden layer (as a list), and the activation function to be used (0 for $tanh$ and 1 for $ReLU$ as input. It initializes the relevant class members, and also initializes dictionaries corresponding to the parameters (weights), node activations, gradients, square gradients (for ADAM), and records of the previous gradient update (for GD with momentum). It also initializes geometrically decreasing estimates for $\beta_1$ and $\beta_2$, as required by ADAM. 
+
+\item \texttt{forward\_pass} computes a forward pass through the network on a given input image and stores the node activations at each node.
+
+\item \texttt{nonlinear} is a routine to compute non-linearity on a list of inputs according to the activation function specified.
+
+\item \texttt{softmax} is a routine that computes the softmax probabilities of each of the output states, given the node activations in the final layer for an input image. 
+
+\item \texttt{compute\_loss} computes the softmax loss for a given input and adds that to the class member \textit{loss}.
+
+\item \texttt{compute\_gradients}
+ 
+ 
+\end{itemize}
+
+\bibliography{ref}
+\bibliographystyle{plain}
+\end{document}

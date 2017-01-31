@@ -106,7 +106,7 @@ class Multi_layer_perceptron(object):
         self.loss += (-1) * sum(self.softmax_loss)
         return self.loss
     
-    def compute_gradients(self, true_label):
+    def compute_gradients(self, true_label, batch_size=64):
         '''
         Computes gradients of the loss with respect to all the parameters
         '''
@@ -150,7 +150,7 @@ class Multi_layer_perceptron(object):
             self.params["weights" + str(i)] = np.subtract(self.params["weights" + str(i)], ((learning_rate / div_factor) * self.gradients["weights" + str(i)]))
             self.gradients["weights" + str(i)] = np.zeros_like(self.gradients["weights" + str(i)])
             
-    def apply_momentum_optimizer(self, learning_rate, div_factor, momentum=0.9 ):
+    def apply_momentum_optimizer(self, div_factor, learning_rate = 0.001,  momentum = 0.009):
         '''
         Applies gradient descent optimizer with momentum to the params
         momentum: coefficient to use with previous momentum
@@ -190,7 +190,7 @@ class Multi_layer_perceptron(object):
         pred = np.argmax(self.probs)
         return pred
     
-    def train(self, data, labels, valid_data, valid_labels, optimizer):
+    def train(self, data, labels, valid_data, valid_labels, optimizer, batch_size = 64):
         '''
         Trains the model on the data for one epoch
         '''
@@ -203,7 +203,7 @@ class Multi_layer_perceptron(object):
                 outputs = self.forward_pass(inputs)
                 probs = self.softmax()
                 loss = self.compute_loss(labels[i])
-                grads = self.compute_gradients(labels[i])
+                grads = self.compute_gradients(labels[i], data.shape[0])
                 # print(self.gradients["weights0"][1][1])
             self.apply_gd_optimizer(0.1, data.shape[0])
             self.loss = 0.0
@@ -219,24 +219,24 @@ class Multi_layer_perceptron(object):
                     outputs = self.forward_pass(inputs)
                     probs = self.softmax()
                     loss = self.compute_loss(labels[mini_batch_indices[j]])
-                    grads = self.compute_gradients(labels[mini_batch_indices[j]])
+                    grads = self.compute_gradients(labels[mini_batch_indices[j]], batch_size)
                     # print(self.gradients["weights0"][1][1])
                 if optimizer == "sgd_minibatch":
                     '''
                     Use stochastic mini batch gradient descent.
                     '''
-                    self.apply_gd_optimizer(0.01, batch_size)
+                    self.apply_gd_optimizer(0.001, batch_size)
 
                 if optimizer == "momentum_minibatch":
                     '''
                     Use mini batch gradient descent with momentum
                     '''
-                    self.apply_momentum_optimizer(0.001, batch_size, 0.009)
+                    self.apply_momentum_optimizer(batch_size, 0.001)
                 if optimizer == "adam_minibatch":
                     '''
                     Use mini batch adam optimizer
                     '''
-                    self.apply_adam_optimizer(0.01, batch_size)
+                    self.apply_adam_optimizer(0.001, batch_size)
             
         self.loss = 0.0
         correct = 0
@@ -261,7 +261,7 @@ class Multi_layer_perceptron(object):
             probs = self.softmax()
             old_loss = old_loss + self.compute_loss(labels[i])
             # print("old loss = %f" % old_loss)
-            self.model_grads = self.compute_gradients(labels[i])
+            self.model_grads = self.compute_gradients(labels[i], data.shape[0])
 
         self.loss = 0.0
         # for j in range(self.no_hidden + 1):
@@ -327,22 +327,20 @@ def grad_relu(inputs):
 
 
 
-model = Multi_layer_perceptron(1, [25], 1)
+# model = Multi_layer_perceptron(1, [25], 1)
 
 
-train_data, train_labels, test_data, test_labels, validation_data, validation_labels = test.get_data()
-# print(train_data.shape, train_labels.shape) 
-shape = train_data.shape
-# for i in range(15):
-#     key = np.argmax(train_labels[i])
-#     print(key)
-train_data = np.reshape(train_data, (shape[0], shape[1]*shape[2]))
-validation_data = np.reshape(validation_data, (validation_data.shape[0], shape[1]*shape[2]))
-test_data = np.reshape(test_data, (test_data.shape[0], shape[1]*shape[2]))
-# print(train_data.shape, test_data.shape, validation_data.shape)
+# train_data, train_labels, test_data, test_labels, validation_data, validation_labels = test.get_data()
 
-for epoch in range(num_epochs):
-    acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
-    print(acc, loss)
+# shape = train_data.shape
+
+# train_data = np.reshape(train_data, (shape[0], shape[1]*shape[2]))
+# validation_data = np.reshape(validation_data, (validation_data.shape[0], shape[1]*shape[2]))
+# test_data = np.reshape(test_data, (test_data.shape[0], shape[1]*shape[2]))
+
+
+# for epoch in range(num_epochs):
+#     acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "momentum_minibatch")
+#     print(acc, loss)
 
 # num_grads = model.numerical_gradients(train_data[:1], train_labels[:1])

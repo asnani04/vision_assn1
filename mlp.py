@@ -267,8 +267,13 @@ class Multi_layer_perceptron(object):
         # for j in range(self.no_hidden + 1):
         #     self.gradients["weights" + str(i)] = np.zeros_like(self.gradients["weights" + str(i)])
         f1 = open("num_grads.txt", "w")
+        f2 = open("var_num_grads.txt", "w")
+        
+        layer_loss = 0.0
         
         for j in range(self.no_hidden + 1):
+            self.difference = 0.0
+            self.sq_difference = 0.0
             wt_string = "weights" + str(j)
             self.num_gradients[wt_string] = np.zeros_like(self.gradients[wt_string])
             for l in range(self.gradients[wt_string].shape[0]):
@@ -284,10 +289,14 @@ class Multi_layer_perceptron(object):
                     delta_loss = new_loss - old_loss
                     # print("new loss = %f"% new_loss)
                     self.num_gradients[wt_string][l][b] = delta_loss / perturbation
-                    f1.write("%f\n" % (self.num_gradients[wt_string][l][b] - self.model_grads[wt_string][l][b]))
+                    # f1.write("%f\n" % (self.num_gradients[wt_string][l][b] - self.model_grads[wt_string][l][b]))
                     # print(self.num_gradients[wt_string][l][b] - self.model_grads[wt_string][l][b])
+                    self.difference = self.difference + (self.num_gradients[wt_string][l][b] - self.model_grads[wt_string][l][b])
+                    self.sq_difference = self.sq_difference + (self.num_gradients[wt_string][l][b] - self.model_grads[wt_string][l][b]) ** 2
                     self.params[wt_string][l][b] = old_weight
                     self.loss = 0.0
+            f1.write("%d, %f\n" % (j, self.difference / (self.node_vector[i] * self.node_vector[i+1])))
+            f2.write("%d, %f\n" % (j, self.sq_difference / (self.node_vector[i] * self.node_vector[i+1])))
         f1.close()            
         return self.num_gradients
                         

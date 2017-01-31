@@ -73,8 +73,18 @@ set term eps
 set output "num_back_grads_relu.eps"
 set title "Actfn: relu, network: [784, 100, 25, 10]"
 
-set xlabel "Weights"
-set ylabel "difference"
+set xlabel "Layers"
+set ylabel "Mean difference"
 set key outside
 
-plot "num_grads.txt" using 1 title "diff" with points
+plot "num_grads.txt" using 1:2 title "diff" with linespoints
+
+set term eps
+set output "num_back_grads_relu_var.eps"
+set title "Actfn: relu, network: [784, 100, 25, 10]"
+
+set xlabel "Layers"
+set ylabel "Mean squared difference"
+set key outside
+
+plot "var_num_grads.txt" using 1:2 title "diff" with linespoints

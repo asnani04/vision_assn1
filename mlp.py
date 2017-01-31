@@ -1,5 +1,5 @@
 import numpy as np
-import test
+import inputs as test
 
 input_size = 784
 output_size = 10
@@ -252,7 +252,7 @@ class Multi_layer_perceptron(object):
         return accuracy, loss / data.shape[0]
 
     def numerical_gradients(self, data, labels):
-        perturbation = 0.01
+        perturbation = 0.0001
         old_loss = 0.0
         self.num_gradients = {}
         for i in range(data.shape[0]):
@@ -266,7 +266,8 @@ class Multi_layer_perceptron(object):
         self.loss = 0.0
         # for j in range(self.no_hidden + 1):
         #     self.gradients["weights" + str(i)] = np.zeros_like(self.gradients["weights" + str(i)])
-            
+        f1 = open("num_grads.txt", "w")
+        
         for j in range(self.no_hidden + 1):
             wt_string = "weights" + str(j)
             self.num_gradients[wt_string] = np.zeros_like(self.gradients[wt_string])
@@ -283,10 +284,11 @@ class Multi_layer_perceptron(object):
                     delta_loss = new_loss - old_loss
                     # print("new loss = %f"% new_loss)
                     self.num_gradients[wt_string][l][b] = delta_loss / perturbation
-                    print(self.num_gradients[wt_string][l][b] - self.model_grads[wt_string][l][b])
+                    f1.write("%f\n" % (self.num_gradients[wt_string][l][b] - self.model_grads[wt_string][l][b]))
+                    # print(self.num_gradients[wt_string][l][b] - self.model_grads[wt_string][l][b])
                     self.params[wt_string][l][b] = old_weight
                     self.loss = 0.0
-                    
+        f1.close()            
         return self.num_gradients
                         
 

@@ -1,6 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import test
+#import matplotlib.pyplot as plt
+import inputs as test
 import mlp
 
 input_size = 784
@@ -26,28 +26,20 @@ test_data = np.reshape(test_data, (test_data.shape[0], shape[1]*shape[2]))
 
 
 
-model = mlp.Multi_layer_perceptron(0, [], 1)
-f1 = open("h0_adam.txt", "w")
 
-for epoch in range(num_epochs):
-    acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
-    print(acc, loss)
-    f1.write("%d, %f, %f\n" % (epoch+1, acc, loss))
+# model = mlp.Multi_layer_perceptron(4, [100, 50, 25, 25], 1)
+# f1 = open("h4_100_50_25_25_adam.txt", "w")
+
+# for epoch in range(num_epochs):
+#     acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
+#     print(acc, loss)
+#     f1.write("%d, %f, %f\n" % (epoch+1, acc, loss))
     
-f1.close()
+# f1.close()
 
-del model
+# del model
 
-model = mlp.Multi_layer_perceptron(3, [100, 50, 25], 1)
-f1 = open("h2_100_50_25_adam.txt", "w")
-
-for epoch in range(num_epochs):
-    acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
-    print(acc, loss)
-    f1.write("%d, %f, %f\n" % (epoch+1, acc, loss))
-    
-f1.close()
-
-del model
+model = mlp.Multi_layer_perceptron(2, [100, 25], 1)
+num_grads = model.numerical_gradients(train_data[:1], train_labels[:1])
 
 

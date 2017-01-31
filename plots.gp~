@@ -1,0 +1,8 @@
+set term eps
+set output "tanh_single_hidden_layer.png"
+set title "Act fn: tanh, network: [784, h, 10], optimizer: sgd"
+
+set xlabel "Number of epochs"
+set ylabel "Accuracy"
+
+plot "h1_100_tanh_sgd.txt" using 1:2 title "h=100", "h1_25_tanh_sgd.txt" using 1:2 title "h=25","h1_5_tanh_sgd.txt" using 1:2 title "h=5" 

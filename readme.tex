@@ -37,10 +37,23 @@ The code has been broken up into three files:
 
 \item \texttt{compute\_loss} computes the softmax loss for a given input and adds that to the class member \textit{loss}.
 
-\item \texttt{compute\_gradients}
+\item \texttt{compute\_gradients} takes the true label of the processed image, and computes the back propagated error at each node, as well as the gradient of the loss with respect to each parameter in the network. The sum of all gradients over a mini batch is constrained to be at most 5 times the batch size, to cure the problem of exploding gradients. 
+
+\item \texttt{apply\_gd\_optimizer} uses simple gradient descent to update the weights.
+
+\item \texttt{apply\_momentum\_optimizer} applies gradient descent with a standard momentum term to update the parameters. It uses the dictionary storing previous weight updates for this purpose. 
+
+\item \texttt{apply\_adam\_optimizer} applies the ADAM optimizer with standard settings of $\beta_1$ and $\beta_2$ by default, but these can be passed as an argument by the \textit{train} function. It uses the accumulated average gradient and accumulated squared average gradient for this purpose. 
+
+\item \texttt{train} takes train and validation data, and a choice of optimizer (sgd, momentum or adam) and performs training for one epoch on the training data, followed by a test on the validation dataset. It returns the loss and accuracy on the validation dataset. Except for standard GD, all the optimizers work for a stochastic minibatch setting, since it converges faster. 
+
+\item \texttt{numerical\_gradients} takes a set of data points and computes backpropagated error of the weights on those points. Then, one parameter is perturbed slightly, and its effect on the new loss is seen after a forward pass. This is used to compute the numerical gradient of the loss with respect to that parameter, and this is done for all the parameters one after another.
  
  
 \end{itemize}
+
+\section{Experiments and Findings}
+
 
 \bibliography{ref}
 \bibliographystyle{plain}

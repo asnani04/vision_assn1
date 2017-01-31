@@ -8,13 +8,6 @@ output_size = 10
 num_epochs = 10
 batch_size = 64
 
-class stats(object):
-    def __init__(self):
-        self.acc = []
-        self.train_loss = []
-        self.valid_loss = []
-        self.epochs = []
-
 
         
 train_data, train_labels, test_data, test_labels, validation_data, validation_labels = test.get_data()
@@ -27,19 +20,19 @@ test_data = np.reshape(test_data, (test_data.shape[0], shape[1]*shape[2]))
 
 
 
-# model = mlp.Multi_layer_perceptron(4, [100, 50, 25, 25], 1)
-# f1 = open("h4_100_50_25_25_adam.txt", "w")
+model = mlp.Multi_layer_perceptron(1, [25], 1)
+f1 = open("h1_25_adam_2.txt", "w")
 
-# for epoch in range(num_epochs):
-#     acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
-#     print(acc, loss)
-#     f1.write("%d, %f, %f\n" % (epoch+1, acc, loss))
+for epoch in range(num_epochs):
+    acc, loss = model.train(train_data[:50000], train_labels[:50000], validation_data[:5000], validation_labels[:5000], "adam_minibatch")
+    print(acc, loss)
+    f1.write("%d, %f, %f\n" % (epoch+1, acc, loss))
     
-# f1.close()
+f1.close()
 
-# del model
+del model
 
-model = mlp.Multi_layer_perceptron(2, [100, 25], 1)
-num_grads = model.numerical_gradients(train_data[:1], train_labels[:1])
+# model = mlp.Multi_layer_perceptron(2, [100, 25], 1)
+# num_grads = model.numerical_gradients(train_data[:1], train_labels[:1])
 
 

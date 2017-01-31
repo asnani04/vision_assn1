@@ -3,8 +3,6 @@ import inputs as test
 
 input_size = 784
 output_size = 10
-num_epochs = 10
-batch_size = 64
 
 class Multi_layer_perceptron(object):
     def __init__(self, no_hidden, node_vector, act_fun):
